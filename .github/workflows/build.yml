@@ -36,7 +36,7 @@ jobs:
         run: |
           cd termux-app
           find app/src/main/res/values -name strings.xml -exec sed -i 's|<!ENTITY TERMUX_APP_NAME "Termux">|<!ENTITY TERMUX_APP_NAME "Termux Plus">|' {} +
-          echo "apply from: '../termux-patch/patch/opt.gradle'" >> app/build.gradle
+          echo "apply from: '../../termux-patch/patch/opt.gradle'" >> app/build.gradle
 
       - name: Build Termux Plus APK
         id: build

@@ -1,4 +1,4 @@
-android.apply {
+android {
     compileSdkVersion 36
     
     defaultConfig {
