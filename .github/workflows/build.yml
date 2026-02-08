@@ -36,14 +36,14 @@ jobs:
         run: |
           cd termux-app
           find app/src/main/res/values -name strings.xml -exec sed -i 's|<!ENTITY TERMUX_APP_NAME "Termux">|<!ENTITY TERMUX_APP_NAME "Termux Plus">|' {} +
-          cat ../termux-patch/patch/opt.gradle >> app/build.gradle
+          echo "apply from: '../termux-patch/patch/opt.gradle'" >> app/build.gradle
 
       - name: Build Termux Plus APK
         id: build
         run: |
           cd termux-app
           export TERMUX_PACKAGE_VARIANT=apt-android-7
-          export TERMUX_APP_VERSION_NAME=0.119-plus
+          export TERMUX_APP_VERSION_NAME=0.119.0-plus
           export TERMUX_APK_VERSION_TAG=plus-$(date +%Y%m%d%H%M)
           ./gradlew assembleRelease --stacktrace --no-daemon
           echo "BUILD_TIMESTAMP=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
@@ -51,5 +51,5 @@ jobs:
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: termux-plus-${{ steps.build.outputs.BUILD_TIMESTAMP }}
+          name: termux-plus-${{ steps.build.outputs.BUILD_TIMESTAMP }}-${{ github.sha }}
           path: termux-app/app/build/outputs/apk/release/*.apk

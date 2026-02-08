@@ -4,6 +4,18 @@ android.apply {
     defaultConfig {
         minSdkVersion 28
         targetSdkVersion 28
+        
+        externalNativeBuild {
+            ndkBuild {
+                cFlags "-std=c11", "-Wall", "-Werror", "-O3", "-flto", 
+                       "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
+                       "-march=armv8-a", "-mtune=cortex-a53"
+                ldFlags "-O3", "-flto", "-Wl,--gc-sections", "-Wl,--as-needed"
+                arguments "NDK_TOOLCHAIN_VERSION:=clang"
+            }
+        }
+        
+        splits.abi.enable = false
     }
     
     buildTypes {
@@ -29,20 +41,6 @@ android.apply {
         ndkBuild {
             arguments '-j' + Runtime.runtime.availableProcessors()
         }
-    }
-    
-    defaultConfig {
-        externalNativeBuild {
-            ndkBuild {
-                cFlags "-std=c11", "-Wall", "-Werror", "-O3", "-flto", 
-                       "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
-                       "-march=armv8-a", "-mtune=cortex-a53"
-                ldFlags "-O3", "-flto", "-Wl,--gc-sections", "-Wl,--as-needed"
-                arguments "NDK_TOOLCHAIN_VERSION:=clang"
-            }
-        }
-        
-        splits.abi.enable = false
     }
     
     packagingOptions {
@@ -77,11 +75,13 @@ task createOptimizedProguard {
 -verbose
 -allowaccessmodification
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
+
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
     public static *** v(...);
     public static *** i(...);
 }
+
 -keep class com.termux.** { *; }
 -keep class * implements android.os.Parcelable {
     public static final android.os.Parcelable$Creator *;
