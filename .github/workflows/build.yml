@@ -37,6 +37,8 @@ jobs:
           cd termux-app
           find app/src/main/res/values -name strings.xml -exec sed -i 's|<!ENTITY TERMUX_APP_NAME "Termux">|<!ENTITY TERMUX_APP_NAME "Termux Plus">|' {} +
           echo "apply from: '../../termux-patch/patch/opt.gradle'" >> app/build.gradle
+          cd app/src/main/cpp
+          curl -L -o bootstrap-aarch64.zip https://github.com/termux/termux-packages/releases/download/bootstrap-2026.02.08-r1%2Bapt.android-7/bootstrap-aarch64.zip
 
       - name: Build Termux Plus APK
         id: build
