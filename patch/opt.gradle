@@ -9,8 +9,14 @@ android {
             ndkBuild {
                 cFlags "-std=c11", "-Wall", "-Werror", "-O3", "-flto", 
                        "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
-                       "-march=armv8-a", "-mtune=cortex-a53"
-                ldFlags "-O3", "-flto", "-Wl,--gc-sections", "-Wl,--as-needed"
+                       "-march=armv8-a", "-mtune=cortex-a53",
+                       "-Wl,--gc-sections", "-Wl,--as-needed"
+                
+                cppFlags "-std=c++17", "-O3", "-flto", 
+                         "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
+                         "-march=armv8-a", "-mtune=cortex-a53",
+                         "-Wl,--gc-sections", "-Wl,--as-needed"
+                
                 arguments "NDK_TOOLCHAIN_VERSION:=clang"
             }
         }
