@@ -7,6 +7,8 @@ android {
         
         externalNativeBuild {
             ndkBuild {
+                arguments "-j" + Runtime.runtime.availableProcessors()
+                
                 cFlags "-std=c11", "-Wall", "-Werror", "-O3", "-flto", 
                        "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
                        "-march=armv8-a", "-mtune=cortex-a53",
@@ -16,8 +18,6 @@ android {
                          "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
                          "-march=armv8-a", "-mtune=cortex-a53",
                          "-Wl,--gc-sections", "-Wl,--as-needed"
-                
-                arguments "NDK_TOOLCHAIN_VERSION:=clang"
             }
         }
         
@@ -41,12 +41,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
         coreLibraryDesugaringEnabled true
-    }
-    
-    externalNativeBuild {
-        ndkBuild {
-            arguments '-j' + Runtime.runtime.availableProcessors()
-        }
     }
     
     packagingOptions {
