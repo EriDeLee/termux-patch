@@ -1,5 +1,4 @@
-# patch/opt.gradle
-android {
+android.apply {
     compileSdkVersion 36
     
     defaultConfig {
