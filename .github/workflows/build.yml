@@ -1,0 +1,55 @@
+# .github/workflows/build.yml
+name: Termux Plus Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout patch repository
+        uses: actions/checkout@v4
+        with:
+          path: termux-patch
+
+      - name: Checkout Termux app repository
+        uses: actions/checkout@v4
+        with:
+          repository: termux/termux-app
+          path: termux-app
+          submodules: true
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Apply Optimizations and Patches
+        run: |
+          cd termux-app
+          find app/src/main/res/values -name strings.xml -exec sed -i 's|<!ENTITY TERMUX_APP_NAME "Termux">|<!ENTITY TERMUX_APP_NAME "Termux Plus">|' {} +
+          cat ../termux-patch/patch/opt.gradle >> app/build.gradle
+
+      - name: Build Termux Plus APK
+        id: build
+        run: |
+          cd termux-app
+          export TERMUX_PACKAGE_VARIANT=apt-android-7
+          export TERMUX_APP_VERSION_NAME=0.119-plus
+          export TERMUX_APK_VERSION_TAG=plus-$(date +%Y%m%d%H%M)
+          ./gradlew assembleRelease --stacktrace --no-daemon
+          echo "BUILD_TIMESTAMP=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: termux-plus-${{ steps.build.outputs.BUILD_TIMESTAMP }}
+          path: termux-app/app/build/outputs/apk/release/*.apk

@@ -1,0 +1,99 @@
+# patch/opt.gradle
+android {
+    compileSdkVersion 36
+    
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 28
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+            
+            ndk {
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+    
+    externalNativeBuild {
+        ndkBuild {
+            arguments '-j' + Runtime.runtime.availableProcessors()
+        }
+    }
+    
+    defaultConfig {
+        externalNativeBuild {
+            ndkBuild {
+                cFlags "-std=c11", "-Wall", "-Werror", "-O3", "-flto", 
+                       "-ffast-math", "-funroll-loops", "-fomit-frame-pointer",
+                       "-march=armv8-a", "-mtune=cortex-a53"
+                ldFlags "-O3", "-flto", "-Wl,--gc-sections", "-Wl,--as-needed"
+                arguments "NDK_TOOLCHAIN_VERSION:=clang"
+            }
+        }
+        
+        splits.abi.enable = false
+    }
+    
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        exclude 'META-INF/LICENSE*'
+        exclude 'META-INF/NOTICE*'
+        exclude 'META-INF/*.kotlin_module'
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xlint:none', '-nowarn']
+    options.fork = true
+    options.incremental = true
+}
+
+android.buildTypes.release {
+    proguardFiles += file('proguard-optimize.pro')
+}
+
+task createOptimizedProguard {
+    doLast {
+        def proguardFile = new File(projectDir, 'proguard-optimize.pro')
+        if (!proguardFile.exists()) {
+            proguardFile.text = '''
+-optimizationpasses 3
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontpreverify
+-verbose
+-allowaccessmodification
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+-keep class com.termux.** { *; }
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+'''
+        }
+    }
+}
+
+preBuild.dependsOn createOptimizedProguard
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
+}
