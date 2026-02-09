@@ -20,8 +20,15 @@ android {
                          "-Wl,--gc-sections", "-Wl,--as-needed"
             }
         }
-        
-        splits.abi.enable = false
+    }
+    
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'
+            universalApk false
+        }
     }
     
     buildTypes {
